@@ -228,7 +228,6 @@ class TicTacToe:
                                 # self.turn = 'AI'
 
                 elif self.situation == 'end':
-                    print(1)
                     if key_in[pygame.K_RETURN]:
                         self.situation = 'body'
                         self.reset_map()
