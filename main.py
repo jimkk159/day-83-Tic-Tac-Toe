@@ -41,6 +41,10 @@ class TicTacToe:
         if self.count == 60:
             self.count = 0
 
+    def switch_turn(self):
+        if self.turn != self.turn_to:
+            self.turn = self.turn_to
+
     # For Game Start View
     def welcome(self):
         self.windows.fill(black)
@@ -79,6 +83,7 @@ class TicTacToe:
         pygame.draw.rect(self.windows, black,
                          pygame.Rect(X // 2 - 100, Y // 2 - 30, 200, 60))
         font = pygame.font.Font('freesansbold.ttf', 44)
+
         if self.winner == 'Human':
             text = font.render('You Win!', True, white, black)
         elif self.winner == 'AI':
@@ -97,12 +102,6 @@ class TicTacToe:
         ending_text.center = (X // 2, Y // 2 + 50)
         self.windows.blit(text, ending_text)
 
-        # reset variable
-        self.turn = 'Human'
-        self.turn_to = 'Human'
-        self.winner = ''
-        self.reset_map()
-
     def is_end(self):
         rows = len(self.map)
         cols = len(self.map[0])
@@ -110,37 +109,41 @@ class TicTacToe:
             if self.map[row].count('O') == 3:
                 self.situation = 'end'
                 self.winner = 'Human'
+                return
 
             elif self.map[row].count('X') == 3:
                 self.situation = 'end'
                 self.winner = 'AI'
+                return
 
         for col in range(cols):
             column = [item[col] for item in self.map]
             if column.count('O') == 3:
                 self.situation = 'end'
                 self.winner = 'Human'
+                return
 
             elif column.count('X') == 3:
                 self.situation = 'end'
                 self.winner = 'AI'
+                return
 
         if self.map[1][1] == 'O' and (self.map[0][0] == self.map[1][1] == self.map[2][2] or
                                       self.map[0][2] == self.map[1][1] == self.map[2][0]):
             self.situation = 'end'
             self.winner = 'Human'
+            return
 
         if self.map[1][1] == 'X' and (self.map[0][0] == self.map[1][1] == self.map[2][2] or
                                       self.map[0][2] == self.map[1][1] == self.map[2][0]):
             self.situation = 'end'
             self.winner = 'AI'
+            return
 
-        for row in range(rows):
-            if all(self.map[0]) and all(self.map[1]) and all(self.map[2]):
-                self.situation = 'end'
-
-        if self.situation != 'end' and self.turn_to != self.turn:
-            self.turn = self.turn_to
+        if all(self.map[0]) and all(self.map[1]) and all(self.map[2]):
+            print(1)
+            self.situation = 'end'
+            return
 
     # For Tic Tac Toe board
     def game_board(self):
@@ -256,7 +259,6 @@ class TicTacToe:
         if result:
             return result
 
-        print(f'Step5 ')
         # to choice
         # First choice middle
         if self.map[1][1] == '':
@@ -282,7 +284,6 @@ class TicTacToe:
                         pick_choices = [(item[0], item[1] - 1), (item[0], item[1] + 1)]
                         return random.choice(pick_choices)
 
-        print(f'Step6 ', end='')
         rest_corner = corner.copy()
         count = 0
         col_set = [0, 1, 2]
@@ -295,7 +296,7 @@ class TicTacToe:
                     row_set.remove(item[1])
                     count += 1
 
-                else:
+                elif item[0] in col_set and item[1] in row_set:
                     col_set.remove(item[0])
                     row_set.remove(item[1])
                     rest_corner.remove((col_set[0], row_set[0]))
@@ -303,7 +304,6 @@ class TicTacToe:
                     if self.map[pick_row][pick_col] == '':
                         return pick_row, pick_col
 
-        print('Step7 ', end='')
         # Third choice corner
         for item in corner:
             if self.map[item[0]][item[1]] == '':
@@ -325,6 +325,7 @@ class TicTacToe:
                 quit()
 
             if event.type == pygame.KEYDOWN:
+
                 key_in = pygame.key.get_pressed()
                 if self.situation == 'init':
 
@@ -341,62 +342,67 @@ class TicTacToe:
                     if key_in[pygame.K_RETURN]:
                         if self.wel_type == 0:
                             self.situation = 'body'
-                            self.map = [['', '', ''], ['', '', ''], ['', '', '']]
+                            self.reset_map()
 
                         elif self.wel_type == 1:
                             pygame.quit()
                             quit()
 
                 elif self.situation == 'body':
-                    if self.turn == 'Human':
+
+                    row, col = self.choice
+                    if key_in[pygame.K_UP]:
+                        row -= 1
+                        if row < 0:
+                            row = 1
+                        self.choice = row, col
+
+                    elif key_in[pygame.K_DOWN]:
+                        row += 1
+                        if row > 2:
+                            row = 2
+                        self.choice = row, col
+
+                    elif key_in[pygame.K_LEFT]:
+                        col -= 1
+                        if col < 0:
+                            col = 0
+                        self.choice = row, col
+
+                    elif key_in[pygame.K_RIGHT]:
+                        col += 1
+                        if col > 2:
+                            col = 2
+                        self.choice = row, col
+
+                    elif key_in[pygame.K_RETURN]:
                         row, col = self.choice
-                        if key_in[pygame.K_UP]:
-                            row -= 1
-                            if row < 0:
-                                row = 1
-                            self.choice = row, col
-
-                        elif key_in[pygame.K_DOWN]:
-                            row += 1
-                            if row > 2:
-                                row = 2
-                            self.choice = row, col
-
-                        elif key_in[pygame.K_LEFT]:
-                            col -= 1
-                            if col < 0:
-                                col = 0
-                            self.choice = row, col
-
-                        elif key_in[pygame.K_RIGHT]:
-                            col += 1
-                            if col > 2:
-                                col = 2
-                            self.choice = row, col
-
-                        elif key_in[pygame.K_RETURN]:
-
-                            row, col = self.choice
-                            if self.map[row][col] == '':
-                                self.map[row][col] = 'O'
-                                self.turn_to = 'AI'
-
-                    elif self.turn == 'AI':
-                        ai_choice = self.AI_brain()
-                        print('ai_choice', ai_choice)
-                        self.map[ai_choice[0]][ai_choice[1]] = 'X'
-                        self.turn_to = 'Human'
+                        if self.map[row][col] == '':
+                            self.map[row][col] = 'O'
+                            self.turn_to = 'AI'
 
                 elif self.situation == 'end':
                     if key_in[pygame.K_RETURN]:
+                        print('end enter')
+                        # reset variable
                         self.situation = 'body'
+                        self.turn = 'Human'
+                        self.turn_to = 'Human'
+                        self.winner = ''
+                        self.reset_map()
 
         if self.situation == 'init':
             self.welcome()
 
+        if self.turn == self.turn_to == 'AI':
+            ai_choice = self.AI_brain()
+            self.map[ai_choice[0]][ai_choice[1]] = 'X'
+            self.turn_to = 'Human'
+
         if self.situation == 'body':
             self.game_board()
             self.is_end()
+            self.switch_turn()
 
         if self.situation == 'end':
             self.ending()
