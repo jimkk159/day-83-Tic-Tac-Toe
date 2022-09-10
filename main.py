@@ -1,4 +1,8 @@
+import random
+
 import pygame
+from random import choice
+from itertools import combinations
 
 X = 400
 Y = 400
@@ -21,12 +25,22 @@ class TicTacToe:
         self.wel_type = 0
         self.situation = 'init'
         self.turn = 'Human'
+        self.turn_to = 'Human'
         self.windows = pygame.display.set_mode((X, Y))
         self.welcome()
 
     def reset_map(self):
         self.map = [['', '', ''], ['', '', ''], ['', '', '']]
 
+    def color_blink(self):
+        self.count += 1
+        if self.count == 50:
+            self.blink_color = (self.blink_color[1], self.blink_color[0])
+
+        if self.count == 60:
+            self.count = 0
+
+    # For Game Start View
     def welcome(self):
         self.windows.fill(black)
         font = pygame.font.Font('freesansbold.ttf', 44)
@@ -59,6 +73,7 @@ class TicTacToe:
         exit_text.midleft = (X // 2 - 40, Y // 2 + 80)
         self.windows.blit(text, exit_text)
 
+    # For Game End
     def ending(self):
         pygame.draw.rect(self.windows, black,
                          pygame.Rect(X // 2 - 100, Y // 2 - 30, 200, 60))
@@ -96,6 +111,10 @@ class TicTacToe:
                  self.map[0][2] == self.map[1][1] == self.map[2][0]):
             self.situation = 'end'
 
+        if self.situation == 'end' and self.turn_to == self.turn:
+            self.turn = self.turn_to
+
+    # For Tic Tac Toe board
     def game_board(self):
         self.windows.fill(black)
         self.draw_title(X - 90, 20)
@@ -152,14 +171,113 @@ class TicTacToe:
             horizontal_line.center = (x, y - 125 + item * 50)
             self.windows.blit(text, horizontal_line)
 
-    def color_blink(self):
-        self.count += 1
-        if self.count == 50:
-            self.blink_color = (self.blink_color[1], self.blink_color[0])
+    def AI_brain(self):
+        rows = len(self.map)
+        cols = len(self.map[0])
 
-        if self.count == 60:
-            self.count = 0
+        def check_diagonal(diagonal_list, symbol):
+            diag_combine = combinations(diagonal_list, 2)
+            for grid1, grid2 in diag_combine:
+                if self.map[grid1[0]][grid1[1]] == self.map[grid2[0]][grid2[1]] == symbol:
+                    diagonal_list.remove((grid1[0], grid1[1]))
+                    diagonal_list.remove((grid2[0], grid2[1]))
+                    return diagonal_list[0]
 
+        def one_step_win(symbol):
+
+            anti_symbol = ''
+            if symbol == 'O':
+                anti_symbol = 'X'
+            elif symbol == 'X':
+                anti_symbol = 'O'
+
+            for row in range(rows):
+                if self.map[row].count(symbol) == 2 and self.map[row].count(anti_symbol) == 0:
+                    for col in range(cols):
+                        if self.map[row][col] != symbol:
+                            return row, col
+
+            for col in range(cols):
+                array = [item[col] for item in self.map]
+                if array.count(symbol) == 2 and array.count(anti_symbol) == 0:
+                    for row in range(rows):
+                        if self.map[row][col] != symbol:
+                            return row, col
+
+            # Positive Diagonal
+            pos_dia = [(0, 0), (1, 1), (2, 2)]
+            result = check_diagonal(pos_dia, symbol)
+            if result:
+                return result
+
+            # Negative Diagonal
+            neg_dia = [(0, 2), (1, 1), (2, 0)]
+            result = check_diagonal(neg_dia, symbol)
+            if result:
+                return result
+
+        # to win
+        result = one_step_win('X')
+        if result:
+            return result
+
+        # defend
+        result = one_step_win('O')
+        if result:
+            return result
+
+        # to choice
+        # First choice middle
+        if self.map[1][1] == '':
+            return 1, 1
+
+        # Second choice corner
+        cross = [(0, 1), (1, 0), (1, 2), (2, 1)]
+        corner = [(0, 0), (2, 0), (0, 2), (2, 2)]
+        if corner.count('O') > 1:
+            pick = random.choice(cross)
+            if self.map[pick[0]][pick[1]] == '':
+                return pick
+
+        if corner.count('O') == 1:
+            for item in cross:
+                if self.map[item[0]][item[1]] == 'O':
+
+                    if item[0] == 1:
+                        pick_choices = [(item[0] - 1, item[1]), (item[0] + 1, item[1])]
+                        return random.choice(pick_choices)
+
+                    if item[1] == 1:
+                        pick_choices = [(item[0], item[1] - 1), (item[0], item[1] + 1)]
+                        return random.choice(pick_choices)
+
+        rest_corner = corner.copy()
+        count = 0
+        col_set = [0, 1, 2]
+        row_set = [0, 1, 2]
+        for item in cross:
+            if self.map[item[0]][item[1]] == 'O':
+
+                if count == 0:
+                    col_set.remove(item[0])
+                    row_set.remove(item[1])
+                    count += 1
+
+                elif item[0] not in col_set or item[1] not in row_set:
+                    col_set.remove(item[0])
+                    row_set.remove(item[1])
+                    rest_corner.remove((col_set[0], row_set[0]))
+                    return random.choice(rest_corner)
+
+        for item in corner:
+            if self.map[item[0]][item[1]] == '':
+                return item
+
+        for item in cross:
+            if self.map[item[0]][item[1]] == '':
+                return item
+
+    # For input event deal with
     def event_maintain(self):
 
         self.clock.tick(self.FPS)
@@ -186,14 +304,13 @@ class TicTacToe:
                     if key_in[pygame.K_RETURN]:
                         if self.wel_type == 0:
                             self.situation = 'body'
-                            self.map = [['X', '', ''], ['X', '', ''], ['X', '', '']]
+                            self.map = [['', '', ''], ['', '', ''], ['', '', '']]
 
                         elif self.wel_type == 1:
                             pygame.quit()
                             quit()
 
                 elif self.situation == 'body':
-
                     if self.turn == 'Human':
                         row, col = self.choice
                         if key_in[pygame.K_UP]:
@@ -225,24 +342,20 @@ class TicTacToe:
                             row, col = self.choice
                             if self.map[row][col] == '':
                                 self.map[row][col] = 'O'
-                                # self.turn = 'AI'
+                                self.turn_to = 'AI'
+
+                    if self.turn == 'AI':
+
+                        ai_choice = self.AI_brain()
+                        print(1)
+                        print(ai_choice)
+                        self.map[ai_choice[0]][ai_choice[1]] = 'X'
+                        self.turn_to = 'Human'
 
                 elif self.situation == 'end':
                     if key_in[pygame.K_RETURN]:
                         self.situation = 'body'
                         self.reset_map()
-                    # elif self.turn == 'AI':
-                    #     rows = len(self.map)
-                    #     cols = len(self.map[0])
-                    #     # defend
-                    #     for row in rows:
-                    #         if self.map[row].count('O') == 2:
-                    #             for col in cols:
-                    #                 ai_choice = (row, col)
-                    #     for col in cols:
-                    #         if self.map[row].count('O') == 2:
-                    #             for row in rows:
-                    #                 ai_choice = (row, col)
 
         if self.situation == 'init':
             self.welcome()
