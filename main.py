@@ -1,12 +1,11 @@
 import random
-
 import pygame
-from random import choice
 from itertools import combinations
+import sys
 
 X = 400
 Y = 400
-
+running = True
 white = (255, 255, 255)
 black = (0, 0, 0)
 
@@ -49,18 +48,22 @@ class TicTacToe:
     def welcome(self):
         self.windows.fill(black)
         font = pygame.font.Font('freesansbold.ttf', 44)
+        # For Pack to exe
+        # font = pygame.font.Font(r'C:\Users\User\AppData\Local\Programs\Python\Python39\Lib\site-packages\pygame\freesansbold.ttf', 44)
         text = font.render('Welcome to', True, white)
         welcome_text = text.get_rect()
         welcome_text.center = (X // 2, Y // 2 - 100)
         self.windows.blit(text, welcome_text)
-
         font = pygame.font.Font('freesansbold.ttf', 28)
+        # For Pack to exe
+        # font = pygame.font.Font(r'C:\Users\User\AppData\Local\Programs\Python\Python39\Lib\site-packages\pygame\freesansbold.ttf', 28)
         text = font.render('Tic Tac Toe Game!', True, white)
         welcome_text = text.get_rect()
         welcome_text.center = (X // 2, Y // 2 - 50)
         self.windows.blit(text, welcome_text)
-
-        font = pygame.font.Font('freesansbold.ttf', 28)
+        font = pygame.font.Font('Cfreesansbold.ttf', 28)
+        # For Pack to exe
+        # font = pygame.font.Font(r'C:\Users\User\AppData\Local\Programs\Python\Python39\Lib\site-packages\pygame\freesansbold.ttf', 28)
         if self.wel_type == 0:
             text = font.render('Enter', True, self.blink_color[0], self.blink_color[1])
         else:
@@ -80,9 +83,10 @@ class TicTacToe:
 
     # For Game End
     def ending(self):
-        pygame.draw.rect(self.windows, black,
-                         pygame.Rect(X // 2 - 100, Y // 2 - 30, 200, 60))
+        pygame.draw.rect(self.windows, black,pygame.Rect(X // 2 - 100, Y // 2 - 30, 200, 60))
         font = pygame.font.Font('freesansbold.ttf', 44)
+        # For Pack to exe
+        # font = pygame.font.Font(r'C:\Users\User\AppData\Local\Programs\Python\Python39\Lib\site-packages\pygame\freesansbold.ttf', 44)
 
         if self.winner == 'Human':
             text = font.render('You Win!', True, white, black)
@@ -97,6 +101,8 @@ class TicTacToe:
         pygame.draw.rect(self.windows, black,
                          pygame.Rect(X // 2 - 120, Y // 2 + 35, 240, 30))
         font = pygame.font.Font('freesansbold.ttf', 20)
+        # For Pack to exe
+        # font = pygame.font.Font(r'C:\Users\User\AppData\Local\Programs\Python\Python39\Lib\site-packages\pygame\freesansbold.ttf', 20)
         text = font.render('Press Enter to continue', True, self.blink_color[0], black)
         ending_text = text.get_rect()
         ending_text.center = (X // 2, Y // 2 + 50)
@@ -159,6 +165,8 @@ class TicTacToe:
     def draw_title(self, x, y):
         title = 'You:O  enemy:X'
         font = pygame.font.Font('freesansbold.ttf', 18)
+        # For Pack to exe
+        # font = pygame.font.Font(r'C:\Users\User\AppData\Local\Programs\Python\Python39\Lib\site-packages\pygame\freesansbold.ttf', 18)
         text = font.render(title, True, white)
         title = text.get_rect()
         title.center = (x, y)
@@ -175,6 +183,8 @@ class TicTacToe:
                 if self.map[row][col] != '':
                     symbol = self.map[row][col]
                     font = pygame.font.Font('freesansbold.ttf', 70)
+                    # For Pack to exe
+                    # font = pygame.font.Font(r'C:\Users\User\AppData\Local\Programs\Python\Python39\Lib\site-packages\pygame\freesansbold.ttf', 70)
                     text = font.render(symbol, True, color, )
                     symbol = text.get_rect()
                     symbol.center = (X // 2 + (col - 1) * 100, Y // 2 + (row - 1) * 100 + 5)
@@ -187,7 +197,9 @@ class TicTacToe:
 
     def draw_dash_line(self, x, y):
         bottom_line = '- ' * 12
-        font = pygame.font.Font('freesansbold.ttf', 40)
+        font = pygame.font.Font(r'freesansbold.ttf', 40)
+        # For Pack to exe
+        # font = pygame.font.Font(r'C:\Users\User\AppData\Local\Programs\Python\Python39\Lib\site-packages\pygame\freesansbold.ttf', 40)
         text = font.render(bottom_line, True, white)
         bottom_line = text.get_rect()
         bottom_line.center = (x, y)
@@ -197,6 +209,8 @@ class TicTacToe:
         for item in range(6):
             horizontal_line = '|'
             font = pygame.font.Font('freesansbold.ttf', 32)
+            # For Pack to exe
+            # font = pygame.font.Font(r'C:\Users\User\AppData\Local\Programs\Python\Python39\Lib\site-packages\pygame\freesansbold.ttf', 32)
             text = font.render(horizontal_line, True, white)
             horizontal_line = text.get_rect()
             horizontal_line.center = (x, y - 125 + item * 50)
@@ -322,7 +336,7 @@ class TicTacToe:
 
             if event.type == pygame.QUIT:
                 pygame.quit()
-                quit()
+                sys.exit()
 
             if event.type == pygame.KEYDOWN:
 
@@ -346,7 +360,7 @@ class TicTacToe:
 
                         elif self.wel_type == 1:
                             pygame.quit()
-                            quit()
+                            sys.exit()
 
                 elif self.situation == 'body':
 
@@ -412,6 +426,6 @@ class TicTacToe:
 
 if __name__ == '__main__':
     game = TicTacToe()
-    while True:
+    while running:
         game.event_maintain()
         pygame.display.update()
