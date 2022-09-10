@@ -383,7 +383,6 @@ class TicTacToe:
 
                 elif self.situation == 'end':
                     if key_in[pygame.K_RETURN]:
-                        print('end enter')
                         # reset variable
                         self.situation = 'body'
                         self.turn = 'Human'
@@ -394,7 +393,7 @@ class TicTacToe:
         if self.situation == 'init':
             self.welcome()
 
-        if self.turn == self.turn_to == 'AI':
+        if self.turn == self.turn_to == 'AI' and self.situation == 'body':
             ai_choice = self.AI_brain()
             self.map[ai_choice[0]][ai_choice[1]] = 'X'
             self.turn_to = 'Human'
